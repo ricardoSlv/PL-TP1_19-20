@@ -3,9 +3,13 @@
     #include "funcs.h"
 
     char *projectName="";
-    char *rootFolder="";  
+    char *rootFolder=""; 
+    
+     
+
     char *email="";
     char *author="";
+
     int depth=0;
     GNode* rootNode;
     GNode* currentNode;
@@ -17,11 +21,11 @@
 
 %%
 ^===\ meta$          {BEGIN Meta;}
-<Meta>^email:[ ]*    {BEGIN DEFemail; }
+<Meta>^email:[ ]*    {BEGIN DEFemail;}
 <DEFemail>.*$        {email=strdup(yytext);
                       BEGIN Meta; 
                      }
-<Meta>^author:[ ]*   {BEGIN DEFauthor; }
+<Meta>^author:[ ]*   {BEGIN DEFauthor;}
 <DEFauthor>.*$       {author=strdup(yytext);
                       BEGIN Meta;
                      }  
@@ -31,12 +35,12 @@
                          }   
 
 <SetNameRoot>[^{%name%}\n ] {rootFolder=appendStr(rootFolder,yytext);
-                            printf("%s\n",rootFolder);}
+                             printf("%s\n",rootFolder);}
 <SetNameRoot>\{%name%\} {rootFolder=appendStr(rootFolder,projectName);}
-<SetNameRoot>\   {printf("space");}
+<SetNameRoot>\   {}
 <SetNameRoot>\n {currentNode = rootNode = g_node_new(rootFolder);
-                 printf("start tree\n");BEGIN Tree;
-                }
+                printf("Started Tree, root: %s\n", currentNode->data);
+                 BEGIN Tree;}
 
 <Tree>^[-]* {   
                 int newDepth= strlen(yytext);
@@ -74,7 +78,6 @@
 .|\n {}
 %%
 
-
 int main(int argc, char const *argv[]){
 
     projectName = (argv[1]) ? argv[1] : ""; 
@@ -82,6 +85,7 @@ int main(int argc, char const *argv[]){
 
     printf("Email: %s, Autor; %s\n",email,author);    
     printNodos(rootNode);
+    makeDirs(rootNode);
     
     return 0;
 }

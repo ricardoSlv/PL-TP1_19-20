@@ -6,6 +6,12 @@
 #include <errno.h>
 #include <glib.h>
 #include <gmodule.h>
+#include <stdio.h>
 
 char* appendStr(char* string1, char* string2);
+
 void printNodos(GNode* );
+
+char* getPath(GNode* );
+
+void makeDirs(GNode* );

@@ -1,5 +1,6 @@
 mft: lex.yy.o funcs.o
 	gcc -o mft lex.yy.o funcs.o -ll `pkg-config --cflags --libs glib-2.0`
+	rm lex.yy.c lex.yy.o funcs.o funcs.h.gch
 
 lex.yy.o: lex.yy.c
 	gcc -c  lex.yy.c  -ll `pkg-config --cflags --libs glib-2.0`	
