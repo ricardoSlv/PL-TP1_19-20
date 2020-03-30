@@ -14,4 +14,8 @@ void printNodos(GNode* );
 
 char* getPath(GNode* );
 
+char* getFilePath (char* nodeData, GNode* rootNode);
+
+void fileAppend(char* filePath,char* text);   
+
 void makeDirs(GNode* );
