@@ -3,12 +3,11 @@
     #include "funcs.h"
 
     char *projectName="";
-    char *rootFolder=""; 
-    
-     
-
     char *email="";
     char *author="";
+
+    char *rootFolder=""; 
+    char *currentFile="";
 
     int depth=0;
     GNode* rootNode;
@@ -17,7 +16,7 @@
 %}
 
 
-%x Meta DEFemail DEFauthor  SetNameRoot Tree TreeNameSet
+%x Meta DEFemail DEFauthor  SetNameRoot Tree TreeNameSet FileNameSet FileWrite 
 
 %%
 ^===\ meta$          {BEGIN Meta;}
@@ -32,7 +31,8 @@
 <Meta>^===\ tree[ ]*\n   {
                           rootFolder="";
                           BEGIN SetNameRoot; 
-                         }   
+                         } 
+<Meta>.|\n {}                           
 
 <SetNameRoot>[^{%name%}\n ] {rootFolder=appendStr(rootFolder,yytext);
                              printf("%s\n",rootFolder);}
@@ -72,9 +72,31 @@
                          currentNode->data=strdup(yytext);
                          BEGIN Tree;
                         }
+<Tree>^===[ ]* {makeDirs(rootNode);
+                BEGIN FileNameSet;}
+<Tree>[^-=]|\n {printf("");}
 
-<Tree>[^-]|\n {}
-<Meta>.|\n {}
+
+<FileNameSet>.+ {currentFile=getFilePath(yytext,rootNode);}
+<FileNameSet>\n {BEGIN FileWrite;}   
+
+<FileWrite>[^{%name%}{%author%}\n]+\n? {fileAppend(currentFile,yytext);}
+
+<FileWrite>\{%name%\}  {fileAppend(currentFile,projectName);}
+<FileWrite>\{%name%\}\n  {fileAppend(currentFile,projectName); fileAppend(currentFile,"\n");}
+<FileWrite>(\{|%|n|a|m|e|%|\})\n? {fileAppend(currentFile,yytext);}
+
+<FileWrite>\{%author%\}  {fileAppend(currentFile,author);}
+<FileWrite>\{%author%\}\n  {fileAppend(currentFile,author); fileAppend(currentFile,"\n");}
+<FileWrite>(\{|%|a|u|t|h|o|r|%|\})\n? {fileAppend(currentFile,yytext);}
+
+<FileWrite>\{%email%\}  {fileAppend(currentFile,email);}
+<FileWrite>\{%email%\}\n  {fileAppend(currentFile,email); fileAppend(currentFile,"\n");}
+<FileWrite>(\{|%|e|m|a|i|l|%|\})\n? {fileAppend(currentFile,yytext);}
+
+<FileWrite>\n===[ ]* {BEGIN FileNameSet;} 
+
+
 .|\n {}
 %%
 
@@ -85,7 +107,6 @@ int main(int argc, char const *argv[]){
 
     printf("Email: %s, Autor; %s\n",email,author);    
     printNodos(rootNode);
-    makeDirs(rootNode);
     
     return 0;
 }
