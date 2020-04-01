@@ -7,6 +7,7 @@
     char *author="";
 
     char *rootFolder=""; 
+    char *currentName="";
     char *currentFile="";
 
     int depth=0;
@@ -37,6 +38,7 @@
 <SetNameRoot>[^{%name%}\n ] {rootFolder=appendStr(rootFolder,yytext);
                              printf("%s\n",rootFolder);}
 <SetNameRoot>\{%name%\} {rootFolder=appendStr(rootFolder,projectName);}
+<SetNameRoot>\{|%|n|a|m|e|%|\} {rootFolder=appendStr(rootFolder,projectName);}
 <SetNameRoot>\   {}
 <SetNameRoot>\n {currentNode = rootNode = g_node_new(rootFolder);
                 printf("Started Tree, root: %s\n", currentNode->data);
@@ -64,21 +66,33 @@
                     GNode* newNode = g_node_append_data(currentNode->parent,"m"); 
                     currentNode = newNode;
                 }
+                currentName="";
                 BEGIN TreeNameSet;
             }
 
 <TreeNameSet>[ ]*  {}
-<TreeNameSet>[^ ^\n]*$ {
-                         currentNode->data=strdup(yytext);
-                         BEGIN Tree;
-                        }
+<TreeNameSet>[^{%name%} \n]+ {currentName=appendStr(currentName,yytext);}
+<TreeNameSet>\{%name%\}  {currentName=appendStr(currentName,projectName);
+                          printf("yytext: %s, project: %s\n",yytext,projectName);}
+<TreeNameSet>(\{|%|n|a|m|e|%|\}) {currentName=appendStr(currentName,yytext);}
+<TreeNameSet>\n {
+                 currentNode->data=strdup(currentName);
+                 BEGIN Tree;
+                }   
+
 <Tree>^===[ ]* {makeDirs(rootNode);
+                currentName="";
                 BEGIN FileNameSet;}
 <Tree>[^-=]|\n {printf("");}
 
 
-<FileNameSet>.+ {currentFile=getFilePath(yytext,rootNode);}
-<FileNameSet>\n {BEGIN FileWrite;}   
+<FileNameSet>[^{%name%} \n]+ {currentName=appendStr(currentName,yytext);}
+<FileNameSet>\{%name%\}  {currentName=appendStr(currentName,projectName);
+                          printf("yytext: %s, project: %s\n",yytext,projectName);}
+<FileNameSet>(\{|%|n|a|m|e|%|\}) {currentName=appendStr(currentName,yytext);}
+<FileNameSet>\n {currentFile=getFilePath(currentName,rootNode);
+                 currentName="";
+                 BEGIN FileWrite;}   
 
 <FileWrite>[^{%name%}{%author%}\n]+\n? {fileAppend(currentFile,yytext);}
 
