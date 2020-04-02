@@ -11,37 +11,34 @@
     char *currentFile="";
 
     int depth=0;
+
     GNode* rootNode;
     GNode* currentNode;
 
+    mark rootMark;
+    mark currentMark;
 %}
 
 
-%x Meta DEFemail DEFauthor  SetNameRoot Tree TreeNameSet FileNameSet FileWrite 
+%x MetaBlock MetaText SetNameRoot Tree TreeNameSet FileNameSet FileWrite 
 
 %%
-^===\ meta$          {BEGIN Meta;}
-<Meta>^email:[ ]*    {BEGIN DEFemail;}
-<DEFemail>.*$        {email=strdup(yytext);
-                      BEGIN Meta; 
-                     }
-<Meta>^author:[ ]*   {BEGIN DEFauthor;}
-<DEFauthor>.*$       {author=strdup(yytext);
-                      BEGIN Meta;
-                     }  
-<Meta>^===\ tree[ ]*\n   {
+^===\ meta$          {BEGIN MetaBlock;
+                      currentName="";}
+
+<MetaBlock>[:\n ]+        {appendStr(currentName,yytext);}
+<MetaBlock>:[ ]* {BEGIN MetaText;}
+<MetaText>.+ {appendStr(currentName,yytext);}  
+<MetaText>\n {BEGIN MetaBlock;}
+<MetaBlock>^===\ tree[ ]*\n   {
                           rootFolder="";
                           BEGIN SetNameRoot; 
                          } 
-<Meta>.|\n {}                           
+<MetaBlock>\ |\n  {}                           
 
-<SetNameRoot>[^{%name%}\n ] {rootFolder=appendStr(rootFolder,yytext);
-                             printf("%s\n",rootFolder);}
-<SetNameRoot>\{%name%\} {rootFolder=appendStr(rootFolder,projectName);}
-<SetNameRoot>\{|%|n|a|m|e|%|\} {rootFolder=appendStr(rootFolder,projectName);}
+<SetNameRoot>[^ \n]+ {rootFolder=appendStr(rootFolder,yytext);}
 <SetNameRoot>\   {}
 <SetNameRoot>\n {currentNode = rootNode = g_node_new(rootFolder);
-                printf("Started Tree, root: %s\n", currentNode->data);
                  BEGIN Tree;}
 
 <Tree>^[-]* {   
@@ -71,10 +68,7 @@
             }
 
 <TreeNameSet>[ ]*  {}
-<TreeNameSet>[^{%name%} \n]+ {currentName=appendStr(currentName,yytext);}
-<TreeNameSet>\{%name%\}  {currentName=appendStr(currentName,projectName);
-                          printf("yytext: %s, project: %s\n",yytext,projectName);}
-<TreeNameSet>(\{|%|n|a|m|e|%|\}) {currentName=appendStr(currentName,yytext);}
+<TreeNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
 <TreeNameSet>\n {
                  currentNode->data=strdup(currentName);
                  BEGIN Tree;
@@ -83,31 +77,15 @@
 <Tree>^===[ ]* {makeDirs(rootNode);
                 currentName="";
                 BEGIN FileNameSet;}
-<Tree>[^-=]|\n {printf("");}
+<Tree>[^-=]|\n {}
 
 
-<FileNameSet>[^{%name%} \n]+ {currentName=appendStr(currentName,yytext);}
-<FileNameSet>\{%name%\}  {currentName=appendStr(currentName,projectName);
-                          printf("yytext: %s, project: %s\n",yytext,projectName);}
-<FileNameSet>(\{|%|n|a|m|e|%|\}) {currentName=appendStr(currentName,yytext);}
+<FileNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
 <FileNameSet>\n {currentFile=getFilePath(currentName,rootNode);
                  currentName="";
                  BEGIN FileWrite;}   
 
-<FileWrite>[^{%name%}{%author%}\n]+\n? {fileAppend(currentFile,yytext);}
-
-<FileWrite>\{%name%\}  {fileAppend(currentFile,projectName);}
-<FileWrite>\{%name%\}\n  {fileAppend(currentFile,projectName); fileAppend(currentFile,"\n");}
-<FileWrite>(\{|%|n|a|m|e|%|\})\n? {fileAppend(currentFile,yytext);}
-
-<FileWrite>\{%author%\}  {fileAppend(currentFile,author);}
-<FileWrite>\{%author%\}\n  {fileAppend(currentFile,author); fileAppend(currentFile,"\n");}
-<FileWrite>(\{|%|a|u|t|h|o|r|%|\})\n? {fileAppend(currentFile,yytext);}
-
-<FileWrite>\{%email%\}  {fileAppend(currentFile,email);}
-<FileWrite>\{%email%\}\n  {fileAppend(currentFile,email); fileAppend(currentFile,"\n");}
-<FileWrite>(\{|%|e|m|a|i|l|%|\})\n? {fileAppend(currentFile,yytext);}
-
+<FileWrite>.+\n {fileAppend(currentFile,yytext);}
 <FileWrite>\n===[ ]* {BEGIN FileNameSet;} 
 
 
@@ -119,7 +97,6 @@ int main(int argc, char const *argv[]){
     projectName = (argv[1]) ? argv[1] : ""; 
     yylex();
 
-    printf("Email: %s, Autor; %s\n",email,author);    
     printNodos(rootNode);
     
     return 0;

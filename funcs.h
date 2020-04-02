@@ -8,6 +8,15 @@
 #include <gmodule.h>
 #include <stdio.h>
 
+typedef struct Mark
+{
+    char* block;
+    char* text;
+    struct Mark* nextMark;
+}*mark;
+
+mark newMark(mark ParentMark,char* nMarkBlock,char* nMarkText);
+
 char* appendStr(char* string1, char* string2);
 
 void printNodos(GNode* );
