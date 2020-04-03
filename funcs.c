@@ -9,12 +9,20 @@ mark newMark(mark ParentMark,char* nMarkBlock,char* nMarkText){
         ParentMark->nextMark=nMark;
     }
     
-    nMark->block = nMarkBlock;
-    nMark->text = nMarkText;
+    nMark->block = strdup(nMarkBlock);
+    nMark->text = strdup(nMarkText);
     
     nMark->nextMark=NULL;
 
     return nMark;
+}
+
+void printMarks(mark rootMark){
+    mark currMk=rootMark;
+    while(currMk){
+        printf("%s: %s\n",currMk->block,currMk->text);
+        currMk=currMk->nextMark;
+    }
 }
 
 

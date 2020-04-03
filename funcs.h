@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <glib.h>
 #include <gmodule.h>
@@ -16,6 +17,8 @@ typedef struct Mark
 }*mark;
 
 mark newMark(mark ParentMark,char* nMarkBlock,char* nMarkText);
+
+void printMarks(mark rootMark); 
 
 char* appendStr(char* string1, char* string2);
 

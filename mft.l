@@ -3,8 +3,8 @@
     #include "funcs.h"
 
     char *projectName="";
-    char *email="";
-    char *author="";
+    char *markBlock="";
+    char *markText="";
 
     char *rootFolder=""; 
     char *currentName="";
@@ -23,15 +23,29 @@
 %x MetaBlock MetaText SetNameRoot Tree TreeNameSet FileNameSet FileWrite 
 
 %%
-^===\ meta$          {BEGIN MetaBlock;
-                      currentName="";}
-
-<MetaBlock>[:\n ]+        {appendStr(currentName,yytext);}
-<MetaBlock>:[ ]* {BEGIN MetaText;}
-<MetaText>.+ {appendStr(currentName,yytext);}  
-<MetaText>\n {BEGIN MetaBlock;}
+^===\ meta\n          {BEGIN MetaBlock;
+                      markBlock="";
+                      markText="";
+                      currentMark=NULL;
+                     }
+<MetaBlock>\#.*\n {}                     
+<MetaBlock>[^:\n ]+        {markBlock=appendStr(markBlock,yytext);}
+<MetaBlock>:[ ]*           {BEGIN MetaText;}
+<MetaText>.+               {markText=appendStr(markText,yytext);}  
+<MetaText>\n               { if(currentMark==NULL){
+                               currentMark=newMark(NULL,markBlock,markText);
+                               rootMark=currentMark;
+                             }
+                             else{
+                               currentMark->nextMark=newMark(NULL,markBlock,markText);
+                               currentMark=currentMark->nextMark;  
+                             }
+                             markText="";markBlock=""; 
+                             BEGIN MetaBlock;
+                           }
 <MetaBlock>^===\ tree[ ]*\n   {
                           rootFolder="";
+
                           BEGIN SetNameRoot; 
                          } 
 <MetaBlock>\ |\n  {}                           
@@ -92,12 +106,17 @@
 .|\n {}
 %%
 
-int main(int argc, char const *argv[]){
+int main(int argc, char *argv[]){
 
-    projectName = (argv[1]) ? argv[1] : ""; 
+    projectName = (argv[2]) ? argv[2] : ""; 
+
+    int fdrd= open(argv[1],O_RDONLY,0664);
+    dup2(fdrd,0);
+    
     yylex();
 
-    printNodos(rootNode);
+    //printNodos(rootNode);
+    printMarks(rootMark);
     
     return 0;
 }

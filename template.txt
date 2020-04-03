@@ -1,6 +1,7 @@
 === meta
 email: jj@di.uminho.pt
 author: J.João
+diretor: Alberto
 # "name" é dado por argumento de linha de comando (argv[1])
 
 === tree
