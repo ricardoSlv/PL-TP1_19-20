@@ -6,7 +6,6 @@ websitetitle: ElearningDelivery
 
 === tree
 {%name%}/
-- {%name%}.fl
 - doc/
 -- {%name%}.md
 - html/
