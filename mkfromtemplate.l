@@ -7,14 +7,12 @@
     char *markBlock="";
     char *markText="";
 
-    FILE* template;
-
     char *rootFolder=""; 
     char *currentName="";
     char *currentFile="";
 
     int depth=0;
-    int donemarks;
+    int marksReplaced=0;
 
     GNode* rootNode;
     GNode* currentNode;
@@ -48,7 +46,7 @@
                              markText="";markBlock=""; 
                              BEGIN MetaBlock;
                            }
-<MetaBlock>^===\ tree[ ]*\n   { if(donemarks==0){
+<MetaBlock>^===\ tree[ ]*\n   { if(marksReplaced==0){
                                     replaceMarks(templateName,projectName,rootMark);
                                 return 0;
                                 }
@@ -65,8 +63,13 @@
 
 <Tree>^[-]* {   
                 int newDepth= strlen(yytext);
-                if((newDepth-depth)>1){return -1;}
+                 
+                if((newDepth-depth)>1){
+                    printf("Error on tree structure\n");
+                    return -1;
+                }
                 
+                    //Shallower
                 else if(depth>newDepth){
                     while(depth > newDepth){
                         currentNode = currentNode->parent;
@@ -75,19 +78,23 @@
                     GNode* newNode = g_node_append_data(currentNode->parent,"m"); 
                     currentNode = newNode;
                 }
+                    //Deeper
                 else if(depth < newDepth){
-                GNode* newNode = g_node_append_data(currentNode,"m"); 
-                currentNode = newNode;
-                depth++;
+                    GNode* newNode = g_node_append_data(currentNode,"m"); 
+                    currentNode = newNode;
+                    depth++;
                 }
-
+                    //Same Depth
                 else if(newDepth==depth){
                     GNode* newNode = g_node_append_data(currentNode->parent,"m"); 
                     currentNode = newNode;
                 }
+
                 currentName="";
                 BEGIN TreeNameSet;
             }
+
+<Tree>[^-=]|\n {}
 
 <TreeNameSet>[ ]*  {}
 <TreeNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
@@ -99,7 +106,6 @@
 <Tree>^===[ ]* {makeDirs(rootNode);
                 currentName="";
                 BEGIN FileNameSet;}
-<Tree>[^-=]|\n {}
 
 
 <FileNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
@@ -124,12 +130,13 @@ int main(int argc, char *argv[]){
     free(comand);
 
     freopen("temp.txt", "rw", stdin);
-    donemarks=0;
+    marksReplaced=0;
     yylex();
 
     freopen("temp.txt", "rw", stdin);
+    //Clean flex_buffer
     yyrestart(stdin);
-    donemarks=1;
+    marksReplaced=1;
     yylex();
 
     system("rm temp.txt");
