@@ -24,14 +24,15 @@
 %}
 
 
-%x MetaBlock MetaText SetNameRoot Tree TreeNameSet FileNameSet FileWrite 
+%x MetaBlock MetaText   SetNameRoot   Tree TreeNameSet    FileNameSet FileWrite 
 
 %%
 ^===\ meta\n          {BEGIN MetaBlock;
                       markBlock="";
                       markText="";
                       currentMark=NULL;
-                     }
+                      }
+
 <MetaBlock>\#.*\n {}                     
 <MetaBlock>[^:\n ]+        {markBlock=appendStr(markBlock,yytext);}
 <MetaBlock>:[ ]*           {BEGIN MetaText;}
@@ -54,8 +55,6 @@
                                 rootFolder="";
                                 BEGIN SetNameRoot;
                               } 
-    
-
 <MetaBlock>\ |\n  {}
 
 
@@ -116,25 +115,24 @@
 
 int main(int argc, char *argv[]){
 
-    projectName = (argv[2]) ? argv[2] : "";
-    templateName = argv[1]; 
+    projectName = (argv[1]) ? argv[1] : "";
+    templateName = argv[2]; 
 
     char* comand=malloc(150);
-    sprintf(comand,"cp %s temp.txt",argv[1]);
+    sprintf(comand,"cp %s temp.txt",argv[2]);
     system(comand);
     free(comand);
-    //int fdrd= open("temp.txt",O_RDWR,0664);
-    //dup2(fdrd,0);
+
     freopen("temp.txt", "rw", stdin);
     donemarks=0;
     yylex();
+
     freopen("temp.txt", "rw", stdin);
+    yyrestart(stdin);
     donemarks=1;
     yylex();
-    //system("rm temp.txt");
 
-    //printNodos(rootNode);
-    printMarks(rootMark);
+    system("rm temp.txt");
     
     return 0;
 }

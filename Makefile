@@ -1,5 +1,5 @@
-mft: lex.yy.o funcs.o
-	gcc -o mft lex.yy.o funcs.o -ll `pkg-config --cflags --libs glib-2.0`
+mkfromtemplate: lex.yy.o funcs.o
+	gcc -o mkfromtemplate lex.yy.o funcs.o -ll `pkg-config --cflags --libs glib-2.0`
 	rm lex.yy.c lex.yy.o funcs.o funcs.h.gch
 
 lex.yy.o: lex.yy.c
@@ -8,8 +8,8 @@ lex.yy.o: lex.yy.c
 funcs.o: funcs.c funcs.h
 	gcc -c funcs.c funcs.h `pkg-config --cflags --libs glib-2.0`
 
-lex.yy.c:mft.l
-	flex mft.l	
+lex.yy.c:mkfromtemplate.l
+	flex mkfromtemplate.l	
 
 clean :
-	rm lex.yy.c lex.yy.o mft funcs.o funcs.h.gch 	
+	rm lex.yy.c lex.yy.o mkfromtemplate funcs.o funcs.h.gch 	

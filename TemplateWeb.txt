@@ -1,0 +1,40 @@
+=== meta
+email: webdev@di.uminho.pt
+author: J.João
+websitetitle: ElearningDelivery
+# "name" é dado por argumento de linha de comando (argv[1])
+
+=== tree
+{%name%}/
+- {%name%}.fl
+- doc/
+-- {%name%}.md
+- html/
+-- index.html
+- css/
+- js/
+-- index.js
+
+
+=== {%name%}.md
+# NAME
+{%name%} - o nosso fabuloso website ...FIXME
+## Synopsis
+{%name%} 
+## Description
+## See also
+## Author
+Comments and bug reports to {%author%}, {%email%}.
+
+=== index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{%websitetitle%}</title>
+</head>
+<body>
+    <h1>Bem vindo ao {%websitetitle%}</h1>
+</body>
+</html>

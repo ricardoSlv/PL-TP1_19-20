@@ -67,7 +67,6 @@ void makeDirs(GNode* node){
     
     char* path=getPath(node);
     char lastChar=path[strlen(path)-1];
-    printf("making dir, path: %s, last char: %s\n",path,&lastChar);
     
     if(G_NODE_IS_LEAF(node)&&lastChar!='/') {
         FILE* f=fopen(path,"a");
@@ -115,14 +114,12 @@ void fileAppend(char* filePath,char* text){
     FILE* file=fopen(filePath,"a");
     fprintf(file,"%s",text);
     fclose(file);
-
 }
 
 
 void printNodos(GNode* node){
     
     char* pdata = "null";
-    //printf("data: %s\n",node->data);
     
     if(!node){return;}
     if(node->parent){
