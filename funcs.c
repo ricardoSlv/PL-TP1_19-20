@@ -25,6 +25,20 @@ void printMarks(mark rootMark){
     }
 }
 
+void replaceMarks(char* templateName,char* projectName,mark rootMark){
+    char* comand=malloc(150);
+    
+    mark currentMark=rootMark;
+
+    while(currentMark){
+        sprintf(comand,"sed  -i 's/{%%%s%%}/%s/g' temp.txt",currentMark->block,currentMark->text);
+        system(comand);
+        currentMark=currentMark->nextMark;
+    }
+    sprintf(comand,"sed  -i 's/{%%name%%}/%s/g' temp.txt",projectName);
+    system(comand);
+}
+
 
 char* appendStr(char* string1,char* string2){
     

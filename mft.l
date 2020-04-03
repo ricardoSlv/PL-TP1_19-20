@@ -3,14 +3,18 @@
     #include "funcs.h"
 
     char *projectName="";
+    char *templateName="";
     char *markBlock="";
     char *markText="";
+
+    FILE* template;
 
     char *rootFolder=""; 
     char *currentName="";
     char *currentFile="";
 
     int depth=0;
+    int donemarks;
 
     GNode* rootNode;
     GNode* currentNode;
@@ -43,12 +47,17 @@
                              markText="";markBlock=""; 
                              BEGIN MetaBlock;
                            }
-<MetaBlock>^===\ tree[ ]*\n   {
-                          rootFolder="";
+<MetaBlock>^===\ tree[ ]*\n   { if(donemarks==0){
+                                    replaceMarks(templateName,projectName,rootMark);
+                                return 0;
+                                }
+                                rootFolder="";
+                                BEGIN SetNameRoot;
+                              } 
+    
 
-                          BEGIN SetNameRoot; 
-                         } 
-<MetaBlock>\ |\n  {}                           
+<MetaBlock>\ |\n  {}
+
 
 <SetNameRoot>[^ \n]+ {rootFolder=appendStr(rootFolder,yytext);}
 <SetNameRoot>\   {}
@@ -103,17 +112,26 @@
 <FileWrite>\n===[ ]* {BEGIN FileNameSet;} 
 
 
-.|\n {}
 %%
 
 int main(int argc, char *argv[]){
 
-    projectName = (argv[2]) ? argv[2] : ""; 
+    projectName = (argv[2]) ? argv[2] : "";
+    templateName = argv[1]; 
 
-    int fdrd= open(argv[1],O_RDONLY,0664);
-    dup2(fdrd,0);
-    
+    char* comand=malloc(150);
+    sprintf(comand,"cp %s temp.txt",argv[1]);
+    system(comand);
+    free(comand);
+    //int fdrd= open("temp.txt",O_RDWR,0664);
+    //dup2(fdrd,0);
+    freopen("temp.txt", "rw", stdin);
+    donemarks=0;
     yylex();
+    freopen("temp.txt", "rw", stdin);
+    donemarks=1;
+    yylex();
+    //system("rm temp.txt");
 
     //printNodos(rootNode);
     printMarks(rootMark);

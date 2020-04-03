@@ -22,6 +22,8 @@ void printMarks(mark rootMark);
 
 char* appendStr(char* string1, char* string2);
 
+void replaceMarks(char* templateName, char* projectName, mark rootMark);
+
 void printNodos(GNode* );
 
 char* getPath(GNode* );
