@@ -8,7 +8,7 @@
     char *markText="";
 
     char *currentName="";
-    char *currentFile="";
+    FILE *currentFile;
 
     int depth=0;
     int marksReplaced=0;
@@ -106,12 +106,14 @@
 
 
 <FileNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
-<FileNameSet>\n {currentFile=getFilePath(currentName,rootNode);
+<FileNameSet>\n {currentFile=getFilePointer(currentName,rootNode);
                  currentName="";
                  BEGIN FileWrite;}   
 
-<FileWrite>.+\n {fileAppend(currentFile,yytext);}
-<FileWrite>\n===[ ]* {BEGIN FileNameSet;} 
+<FileWrite>.+\n {fprintf(currentFile,"%s",yytext);}
+    
+<FileWrite>\n===[ ]* {fclose(currentFile);
+                      BEGIN FileNameSet;} 
 
 
 %%

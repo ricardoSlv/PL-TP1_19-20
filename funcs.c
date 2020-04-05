@@ -101,21 +101,16 @@ GNode* findNodo(GNode* rootNode,char* targetData){
     }
 }
 
-char* getFilePath (char* nodeData, GNode* rootNode){
+FILE* getFilePointer (char* nodeData, GNode* rootNode){
    
     gpointer name = strdup(nodeData);
     GNode* targetNode = findNodo(rootNode,nodeData);
     char* path=getPath(targetNode);
-    return path;
-}
 
-void fileAppend(char* filePath,char* text){
-        
-    FILE* file=fopen(filePath,"a");
-    fprintf(file,"%s",text);
-    fclose(file);
-}
+    FILE* file=fopen(path,"a");
 
+    return file;
+}
 
 void printNodos(GNode* node){
     
