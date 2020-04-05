@@ -117,9 +117,14 @@
 %%
 
 int main(int argc, char *argv[]){
-
-    projectName = (argv[1]) ? argv[1] : "";
-    templateName = argv[2]; 
+    
+    if(argv[2]==NULL){
+        printf("Insuficient number of argumentos");
+        return 1;
+    }
+        
+    projectName =  argv[1] ;
+    templateName = argv[2] ; 
 
     char* comand=malloc(150);
     sprintf(comand,"cp %s temp.txt",argv[2]);
