@@ -136,7 +136,8 @@ int main(int argc, char *argv[]){
     freopen("temp.txt", "rw", stdin);
     marksReplaced=0;
     yylex();
-
+    
+    //Restart File Pointer
     freopen("temp.txt", "rw", stdin);
     //Clean flex_buffer
     yyrestart(stdin);
