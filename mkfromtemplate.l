@@ -119,7 +119,7 @@
 int main(int argc, char *argv[]){
     
     if(argv[2]==NULL){
-        printf("Insuficient number of argumentos");
+        printf("Insuficient number of arguments\n");
         return 1;
     }
         
