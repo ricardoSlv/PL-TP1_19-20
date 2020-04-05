@@ -30,10 +30,10 @@
                       currentMark=NULL;
                       }
                     
-<MetaBlock>[^:\n ]+        {markBlock=appendStr(markBlock,yytext);}
+<MetaBlock>[^:\n]+        {markBlock=appendStr(markBlock,yytext);}
 <MetaBlock>:[ ]*           {BEGIN MetaText;}
 <MetaBlock>\#.*\n           
-<MetaBlock>\ |\n           
+<MetaBlock>\n           
 
 <MetaText>.+               {markText=appendStr(markText,yytext);}  
 <MetaText>\n               { if(currentMark==NULL){
