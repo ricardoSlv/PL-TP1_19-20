@@ -106,6 +106,7 @@
 
 
 <FileNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
+<FileNameSet>[ ]*
 <FileNameSet>\n {currentFile=getFilePointer(currentName,rootNode);
                  currentName="";
                  BEGIN FileWrite;}   
