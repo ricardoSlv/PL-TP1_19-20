@@ -7,7 +7,6 @@
     char *markBlock="";
     char *markText="";
 
-    char *rootFolder=""; 
     char *currentName="";
     char *currentFile="";
 
@@ -22,7 +21,7 @@
 %}
 
 
-%x MetaBlock MetaText   SetNameRoot   Tree TreeNameSet    FileNameSet FileWrite 
+%x MetaBlock MetaText    TreeNameSet Tree     FileNameSet FileWrite 
 
 %%
 ^===\ meta\n          {BEGIN MetaBlock;
@@ -30,10 +29,12 @@
                       markText="";
                       currentMark=NULL;
                       }
-
-<MetaBlock>\#.*\n {}                     
+                    
 <MetaBlock>[^:\n ]+        {markBlock=appendStr(markBlock,yytext);}
 <MetaBlock>:[ ]*           {BEGIN MetaText;}
+<MetaBlock>\#.*\n           
+<MetaBlock>\ |\n           
+
 <MetaText>.+               {markText=appendStr(markText,yytext);}  
 <MetaText>\n               { if(currentMark==NULL){
                                currentMark=newMark(NULL,markBlock,markText);
@@ -50,16 +51,19 @@
                                     replaceMarks(templateName,projectName,rootMark);
                                 return 0;
                                 }
-                                rootFolder="";
-                                BEGIN SetNameRoot;
+                                currentName="";
+                                rootNode=NULL;
+                                BEGIN TreeNameSet;
                               } 
-<MetaBlock>\ |\n  {}
 
-
-<SetNameRoot>[^ \n]+ {rootFolder=appendStr(rootFolder,yytext);}
-<SetNameRoot>\   {}
-<SetNameRoot>\n {currentNode = rootNode = g_node_new(rootFolder);
-                 BEGIN Tree;}
+<TreeNameSet>[ ]*  
+<TreeNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
+<TreeNameSet>\n { if(rootNode==NULL){
+                    rootNode = currentNode = g_node_new(currentName);
+                  }
+                 currentNode->data=strdup(currentName);
+                 BEGIN Tree;
+                }   
 
 <Tree>^[-]* {   
                 int newDepth= strlen(yytext);
@@ -94,14 +98,7 @@
                 BEGIN TreeNameSet;
             }
 
-<Tree>[^-=]|\n {}
-
-<TreeNameSet>[ ]*  {}
-<TreeNameSet>[^ \n]+ {currentName=appendStr(currentName,yytext);}
-<TreeNameSet>\n {
-                 currentNode->data=strdup(currentName);
-                 BEGIN Tree;
-                }   
+<Tree>[^-=]|\n 
 
 <Tree>^===[ ]* {makeDirs(rootNode);
                 currentName="";
