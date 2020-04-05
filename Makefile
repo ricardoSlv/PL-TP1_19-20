@@ -15,5 +15,5 @@ clean :
 	rm lex.yy.c lex.yy.o mkfromtemplate funcs.o funcs.h.gch
 
 restart :
+	find -type d -exec rm -rf {} +
 	rm lex.yy.c lex.yy.o mkfromtemplate funcs.o funcs.h.gch
-	find -type d -exec rm -rf {} +	
