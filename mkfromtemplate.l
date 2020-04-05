@@ -111,7 +111,7 @@
                  currentName="";
                  BEGIN FileWrite;}   
 
-<FileWrite>.+\n {fprintf(currentFile,"%s",yytext);}
+<FileWrite>.*\n {fprintf(currentFile,"%s",yytext);}
 <FileWrite>\n===[ ]* {fclose(currentFile);
                       BEGIN FileNameSet;} 
 
